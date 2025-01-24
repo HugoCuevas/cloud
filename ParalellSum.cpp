@@ -1,14 +1,19 @@
 #include <iostream>
+#include <cstdlib> // Para rand() y srand()
+#include <ctime>   // Para time()
 #include <omp.h>
 
 int main() {
     const int SIZE = 1000;
     int arreglo1[SIZE], arreglo2[SIZE], suma[SIZE];
 
-    // Inicialización de los arreglos con valores declarados
+    // Semilla para generar números aleatorios
+    srand(time(0));
+
+    // Inicialización de los arreglos con valores aleatorios
     for (int i = 0; i < SIZE; ++i) {
-        arreglo1[i] = i + 1;           // Valores de 1 a 1000
-        arreglo2[i] = (i + 1) + 1000; // Valores de 1001 a 2000
+        arreglo1[i] = rand() % 1000 + 1; // Valores entre 1 y 1000
+        arreglo2[i] = rand() % 1000 + 1; // Valores entre 1 y 1000
     }
 
     // Paralelización con OpenMP
