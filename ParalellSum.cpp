@@ -1,24 +1,49 @@
-#include <omp.h>
 #include <iostream>
+#include <omp.h>
 
-static const int N = 16;
-int main(){
-    int is_cpu = true;
-    int *data = static_cast<int*>(malloc(N * sizeof(int)));
-    for(int i=0; i<N; i++) data[i] = i;
+int main() {
+    const int SIZE = 1000;
+    int arreglo1[SIZE], arreglo2[SIZE], suma[SIZE];
 
-    #pragma omp target map(from:is_cpu) map(tofrom:data[0:N])
-    {
-        is_cpu=omp_is_initial_device();
-        #pragma omp parallel for
-        for (int i=0; i<N; i++) 
-            data[i] *= 2;
+    // Inicialización de los arreglos con valores declarados
+    for (int i = 0; i < SIZE; ++i) {
+        arreglo1[i] = i + 1;           // Valores de 1 a 1000
+        arreglo2[i] = (i + 1) + 1000; // Valores de 1001 a 2000
     }
 
-    printf ("Running on %s\n", (is_cpu?"CPU":"GPU"));
-    for(int i=0; i<N; i++) std::cout << data[i] << std::endl;
+    // Paralelización con OpenMP
+#pragma omp parallel num_threads(2)
+    {
+        int id = omp_get_thread_num();
+        if (id == 0) {
+            // Primer hilo: suma los primeros 500 elementos
+            for (int i = 0; i < SIZE / 2; ++i) {
+                suma[i] = arreglo1[i] + arreglo2[i];
+            }
+        }
+        else if (id == 1) {
+            // Segundo hilo: suma los últimos 500 elementos
+            for (int i = SIZE / 2; i < SIZE; ++i) {
+                suma[i] = arreglo1[i] + arreglo2[i];
+            }
+        }
+    }
 
-    free(data);
+    // Imprimir los arreglos
+    std::cout << "Arreglo 1:" << std::endl;
+    for (int i = 0; i < SIZE; ++i) {
+        std::cout << "arreglo1[" << i << "] = " << arreglo1[i] << std::endl;
+    }
+
+    std::cout << "\nArreglo 2:" << std::endl;
+    for (int i = 0; i < SIZE; ++i) {
+        std::cout << "arreglo2[" << i << "] = " << arreglo2[i] << std::endl;
+    }
+
+    std::cout << "\nResultado de la suma:" << std::endl;
+    for (int i = 0; i < SIZE; ++i) {
+        std::cout << "suma[" << i << "] = " << suma[i] << std::endl;
+    }
+
     return 0;
 }
-
